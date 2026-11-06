@@ -6,6 +6,7 @@ import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.Asignacion;
+import java.util.List;
 
 public class FrmAsignacion extends javax.swing.JFrame {
     //CREAR VARIABLES GLOBALES
@@ -191,20 +192,21 @@ public class FrmAsignacion extends javax.swing.JFrame {
         if (noCarnet != null && !noCarnet.trim().isEmpty()) {
             try {
                 //SOLICITA EL OBJETO ASIGNACIÓN AL CONTROLADOR USANOD EL CARNET INGRESADO
-                Asignacion asig = controlador.buscarPorCarnet(noCarnet.trim());
-
-                if (asig != null) {
-                    //SI EXISTE ATUCOMPLETA LAS CAJAS DE TEXTO
-                    txtNoCarnet.setText(asig.getNoCarnet());
-                    txtIdCurso.setText(asig.getIdCurso());
-                    txtCalificacion.setText(String.valueOf(asig.getCalificacion()));
-                    if (asig.getFechaAprobacion() != null) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        txtFechaAprobacion.setText(sdf.format(asig.getFechaAprobacion()));
-                    } else {
-                        txtFechaAprobacion.setText("");
+                List<Asignacion> listaAsignaciones = controlador.buscarPorCarnet(noCarnet.trim());
+                modeloTabla.setRowCount(0);
+                
+                if (listaAsignaciones != null && !listaAsignaciones.isEmpty()) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    
+                    for (Asignacion asig : listaAsignaciones){
+                        modeloTabla.addRow(new Object[]{
+                            asig.getNoCarnet(),
+                            asig.getIdCurso(),
+                            asig.getCalificacion(),
+                            asig.getFechaAprobacion() != null ? sdf.format(asig.getFechaAprobacion()) : ""
+                        });
                     }
-                } else {
+                }else {
                     JOptionPane.showMessageDialog(this, "Asignación Inexistente");
                     limpiar();
                 }

@@ -11,7 +11,7 @@ public class AsignacionController {
     private final AsignacionDao dao = new AsignacionDao();
     
     //BUSCAR POR CARNET
-    public Asignacion buscarPorCarnet (String noCarnet){
+    public List<Asignacion> buscarPorCarnet (String noCarnet){
         return dao.buscarPorCarnet(noCarnet);
     }
     //REGRESAR TODOS LOS REGISTROS

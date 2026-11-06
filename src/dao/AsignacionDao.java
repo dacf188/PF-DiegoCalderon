@@ -37,28 +37,30 @@ public class AsignacionDao {
     }
     
     //FILTRAR POR ID
-    public Asignacion buscarPorCarnet (String carnet){
-        Asignacion asig = null;
+    public List<Asignacion> buscarPorCarnet (String carnet){
+        List<Asignacion> listaAsignaciones = new ArrayList<>();
         try {
             String sql = "SELECT * FROM public.\"Asignación\" WHERE \"No_Carnet\" =?";
             Connection conn = connFactory.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, carnet);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                asig = new Asignacion(
+            while (rs.next()) {
+                Asignacion asig = new Asignacion(
                         rs.getString("No_Carnet"),
                         rs.getString("Id_Curso"),
                         rs.getInt("Calificación"),
                         rs.getDate("Fecha_Aprobación")
                 );
-                ps.close();
-                conn.close();
+                listaAsignaciones.add(asig);
             }
+            rs.close();
+            ps.close();
+            conn.close();
         } catch (SQLException e) {
             Logger.getLogger(AsignacionDao.class.getName()).log(Level.SEVERE, null, e);
         }
-        return asig;
+        return listaAsignaciones;
     }
     
     //GUARDAR
