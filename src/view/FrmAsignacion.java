@@ -8,6 +8,22 @@ import javax.swing.table.DefaultTableModel;
 import model.Asignacion;
 import java.util.List;
 
+//IMPORTACIONES PDF
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileOutputStream;
+import com.lowagie.text.Image;
+
 public class FrmAsignacion extends javax.swing.JFrame {
     //CREAR VARIABLES GLOBALES
     //INSTANCIAMOS EL CONTROLADOR
@@ -30,7 +46,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
         //LIMPIA TODAS LAS FILAS ACTUALES PARA EVITAR DUPLICADOS
         modeloTabla.setRowCount(0);
         //PASA OBJETOS DATE A TEXTO LEGIBLE
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         //RECORRE LA VISTA DESDE EL CONTROLADOR
         for (Asignacion asig : controlador.obtenerTodos()){
             modeloTabla.addRow(new Object[]{
@@ -73,6 +89,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
         jButton5 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtAsignacion = new javax.swing.JTable();
+        btnGenerarCertificacion = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Certificación");
@@ -113,6 +130,9 @@ public class FrmAsignacion extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(jtAsignacion);
 
+        btnGenerarCertificacion.setText("Generar Certificación");
+        btnGenerarCertificacion.addActionListener(this::btnGenerarCertificacionGenerarCertificacion);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -131,20 +151,25 @@ public class FrmAsignacion extends javax.swing.JFrame {
                     .addComponent(txtFechaAprobacion, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtNoCarnet, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addGap(32, 32, 32)
-                        .addComponent(jButton2)
-                        .addGap(34, 34, 34)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
-                        .addComponent(jButton4)
-                        .addGap(35, 35, 35)
-                        .addComponent(jButton5))
-                    .addComponent(jScrollPane1))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnGenerarCertificacion, javax.swing.GroupLayout.PREFERRED_SIZE, 323, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jButton1)
+                                .addGap(32, 32, 32)
+                                .addComponent(jButton2)
+                                .addGap(34, 34, 34)
+                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                                .addComponent(jButton4)
+                                .addGap(35, 35, 35)
+                                .addComponent(jButton5))
+                            .addComponent(jScrollPane1))))
                 .addGap(31, 31, 31))
         );
         layout.setVerticalGroup(
@@ -175,7 +200,9 @@ public class FrmAsignacion extends javax.swing.JFrame {
                     .addComponent(jButton5))
                 .addGap(40, 40, 40)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(43, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnGenerarCertificacion)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         pack();
@@ -196,7 +223,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
                 modeloTabla.setRowCount(0);
                 
                 if (listaAsignaciones != null && !listaAsignaciones.isEmpty()) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                     
                     for (Asignacion asig : listaAsignaciones){
                         modeloTabla.addRow(new Object[]{
@@ -228,7 +255,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
         }
         try {
             //CONVIERTE EL TEXTO DEL JTEXTFIELD A UN OBJETO DATE
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             Date fechaAprobacion = sdf.parse(txtFechaAprobacion.getText().trim());
             
             //ENVIA LOS DATOS AL CONTROLADOR
@@ -255,7 +282,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
         
         if (noCarnet != null && !noCarnet.trim().isEmpty()) {
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                 Date fechaAprobacion = sdf.parse(txtFechaAprobacion.getText().trim());
                 
                 //LLAMA AL CONTROLADOR PARA ACTUALIZAR EL REGISTRO EN LA BASE DE DATOS
@@ -290,6 +317,118 @@ public class FrmAsignacion extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnEliminar
 
+    private void btnGenerarCertificacionGenerarCertificacion(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarCertificacionGenerarCertificacion
+        String noCarnet = JOptionPane.showInputDialog(this, "Ingrese el No Cartnet para generar la certificación");
+        if (noCarnet != null && !noCarnet.trim().isEmpty()) {
+            try {
+                //CONSULTAR LAS ASIGNACIONES MEDIANTE EL CONTROLADOR
+                List<Asignacion> listaAsignacions = controlador.buscarPorCarnet(noCarnet.trim());
+                
+                if (listaAsignacions == null || listaAsignacions.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No se encontraron registros para el carnet");
+                    return;
+                }
+                //CONFIGURAR LA RUTA Y CREAR EL DOCUMENTO PDF
+                String rutaArchivo = "Certificacion_" + noCarnet.trim() + ".pdf";
+                
+                Document documento = new Document(PageSize.LETTER);
+                PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
+                documento.open();
+
+                //FUENTES
+                Font fuenteTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Color.BLACK);
+                Font fuenteSub = FontFactory.getFont(FontFactory.HELVETICA, 12, Color.BLACK);
+                Font fuenteNormal = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.BLACK);
+                Font fuenteTabla = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
+
+                //ENCABEZADO SE HACE UNA TABLA PARA SU POSICIÓN
+                PdfPTable encabezado = new PdfPTable(2);
+                encabezado.setWidthPercentage(100);
+                encabezado.setWidths(new float[]{1.5f, 8.5f});
+                
+                //LOGOTIPO
+                PdfPCell celdaLogo = new PdfPCell();
+                celdaLogo.setBorder(PdfPCell.NO_BORDER);
+                try {
+                    Image logo = Image.getInstance("logo-upana.png");
+                    logo.scaleToFit(100, 100); //Ancho y alto máximo
+                    celdaLogo.addElement(logo);
+                } catch (Exception e){
+                    System.out.println("No se pudo cargar la imagen");
+                }
+                celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                encabezado.addCell(celdaLogo);
+                
+                PdfPCell celdaTitulo = new PdfPCell();
+                celdaTitulo.setBorder(PdfPCell.NO_BORDER);
+                celdaTitulo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                
+                //ENCABEZADO
+                Paragraph titulo = new Paragraph("CERTIFICACIÓN DE CURSOS", fuenteTitulo);
+                titulo.setAlignment(Element.ALIGN_CENTER);
+                Paragraph subtitulo = new Paragraph("Sistema Académico Universitario", fuenteSub);
+                subtitulo.setAlignment(Element.ALIGN_CENTER);
+                
+                celdaTitulo.addElement(titulo);
+                celdaTitulo.addElement(subtitulo);
+                encabezado.addCell(celdaTitulo);
+                
+                documento.add(encabezado);
+                documento.add(new Paragraph(" "));
+
+                //INFORMACIÓN DEL ESTUDIANTE
+                SimpleDateFormat sdfFormato = new SimpleDateFormat("dd//MM/yyyy");
+                String fechaActual = sdfFormato.format(new Date());
+                
+                documento.add(new Paragraph("No. de Carnet: " + noCarnet.trim(), fuenteNormal));
+                documento.add(new Paragraph("Fecha de Emisión: " + fechaActual, fuenteNormal));
+                documento.add(new Paragraph(" "));
+
+                //TABLA DE CURSOS
+                PdfPTable tabla = new PdfPTable(4);
+                tabla.setWidthPercentage(100);
+                tabla.setWidths(new float[]{2f, 3f, 2f, 3f});
+                
+                String[] cabeceras = {"No. Carnet", "ID Curso", "Califiación", "Fecha Aprobación"};
+                for (String cabecera : cabeceras) {
+                    PdfPCell celda = new PdfPCell(new Paragraph(cabecera, fuenteTabla));
+                    celda.setBackgroundColor(new Color(0, 39, 118));
+                    celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celda.setPadding(6);
+                    tabla.addCell(celda);
+                }
+                
+                SimpleDateFormat sdfAsig = new SimpleDateFormat("dd-MM-yyyy");
+                for (Asignacion asig : listaAsignacions) {
+                    tabla.addCell(new PdfPCell(new Paragraph(asig.getNoCarnet(), fuenteNormal)));
+                    tabla.addCell(new PdfPCell(new Paragraph(asig.getIdCurso(), fuenteNormal)));
+                    tabla.addCell(new PdfPCell(new Paragraph(String.valueOf(asig.getCalificacion()), fuenteNormal)));
+                    String fechaAprob = asig.getFechaAprobacion() != null ? sdfAsig.format(asig.getFechaAprobacion()) : "";
+                    tabla.addCell(new PdfPCell(new Paragraph(fechaAprob, fuenteNormal)));
+                }
+                documento.add(tabla);
+
+                //FIRMA
+                documento.add(new Paragraph(" "));
+                Paragraph firma = new Paragraph("_______________________________________\nRegistro Académico", fuenteNormal);
+                firma.setAlignment(Element.ALIGN_RIGHT);
+                documento.add(firma);
+                documento.close();
+                JOptionPane.showMessageDialog(this, "Certificado Generado Con Éxito");
+                try {
+                    File archivoPdf = new File(rutaArchivo);
+                    if (archivoPdf.exists()) {
+                        Desktop.getDesktop().open(archivoPdf);
+                    }
+                } catch (Exception e) {
+                }
+            }catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al generar el PDF");
+                e.printStackTrace();
+        }
+}
+    }//GEN-LAST:event_btnGenerarCertificacionGenerarCertificacion
+
     /**
      * @param args the command line arguments
      */
@@ -320,6 +459,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnGenerarCertificacion;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
