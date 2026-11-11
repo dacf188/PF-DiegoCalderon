@@ -16,7 +16,7 @@ public class AsignacionDao {
         List<Asignacion> lista = new ArrayList<>();
         //INDICAMOS EL ESQUEMA EN QUE ESTÁ ADEMÁS DE INDICARLE EL NOMBRE ESPECÍFICO
         String squl = "SELECT * FROM public.\"Asignación\"";
-        try {Connection conn = connFactory.getConnection();
+        try {Connection conn = connFactory.getConnectionAsignaciones();
         PreparedStatement ps = conn.prepareStatement(squl);
         ResultSet rs = ps.executeQuery();
             while (rs.next()) {                
@@ -41,7 +41,7 @@ public class AsignacionDao {
         List<Asignacion> listaAsignaciones = new ArrayList<>();
         try {
             String sql = "SELECT * FROM public.\"Asignación\" WHERE \"No_Carnet\" =?";
-            Connection conn = connFactory.getConnection();
+            Connection conn = connFactory.getConnectionAsignaciones();
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, carnet);
             ResultSet rs = ps.executeQuery();
@@ -66,7 +66,7 @@ public class AsignacionDao {
     //GUARDAR
     public boolean guardar (Asignacion asig){
         String sql = "INSERT INTO public.\"Asignación\" (\"No_Carnet\", \"Id_Curso\", \"Calificación\", \"Fecha_Aprobación\") VALUES (?, ?, ?, ?)";
-        try (Connection conn = connFactory.getConnection();
+        try (Connection conn = connFactory.getConnectionAsignaciones();
         PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, asig.getNoCarnet());
             ps.setString(2, asig.getIdCurso());
@@ -85,7 +85,7 @@ public class AsignacionDao {
     public boolean actualizar(Asignacion asig) {
         //CAMBIAR
         String sql = "UPDATE public.\"Asignación\" SET \"Id_Curso\" = ?, \"Calificación\" = ?, \"Fecha_Aprobación\" = ? WHERE \"No_Carnet\" = ?";
-        try (Connection conn = connFactory.getConnection();
+        try (Connection conn = connFactory.getConnectionAsignaciones();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, asig.getIdCurso());
@@ -106,7 +106,7 @@ public class AsignacionDao {
     //ELIMINAR
     public boolean eliminar(String noCarnet) {
         String sql = "DELETE FROM public.\"Asignación\" WHERE \"No_Carnet\" = ?";
-        try (Connection conn = connFactory.getConnection();
+        try (Connection conn = connFactory.getConnectionAsignaciones();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, noCarnet);
             
