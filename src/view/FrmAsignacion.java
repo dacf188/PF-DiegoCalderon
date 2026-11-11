@@ -23,6 +23,8 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
 import com.lowagie.text.Image;
+import com.lowagie.text.pdf.draw.LineSeparator;
+import com.lowagie.text.Chunk;
 
 public class FrmAsignacion extends javax.swing.JFrame {
     //CREAR VARIABLES GLOBALES
@@ -39,6 +41,8 @@ public class FrmAsignacion extends javax.swing.JFrame {
      */
     public FrmAsignacion() {
         initComponents();
+        // Configura para que solo se cierre esta ventana y no afecte el menú principal
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         //ASIGNA EL MODELO CON LAS CABECERAS PREDEFINIDAS
         jtAsignacion.setModel(modeloTabla);
     }
@@ -322,12 +326,25 @@ public class FrmAsignacion extends javax.swing.JFrame {
         if (noCarnet != null && !noCarnet.trim().isEmpty()) {
             try {
                 //CONSULTAR LAS ASIGNACIONES MEDIANTE EL CONTROLADOR
-                List<Asignacion> listaAsignacions = controlador.buscarPorCarnet(noCarnet.trim());
+                List<Asignacion> listaAsignaciones = controlador.buscarPorCarnet(noCarnet.trim());
                 
-                if (listaAsignacions == null || listaAsignacions.isEmpty()) {
+                if (listaAsignaciones == null || listaAsignaciones.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "No se encontraron registros para el carnet");
                     return;
                 }
+                estudiante.dao.EstudianteDao estudianteDao = new estudiante.dao.EstudianteDao();
+                estudiante.model.Estudiante est = estudianteDao.obtenerPorCarnet(noCarnet.trim());
+                
+                String nombreCompleto = "Estudiante No Registrado";
+                String carnetMostrado = noCarnet.trim();
+                
+                if (est != null) {
+                    nombreCompleto = est.getNombreEstudiante() + " " + est.getApellidoEstudiante();
+                    carnetMostrado = est.getNoCarnetEstudiante();
+                }
+                
+                cursos.dao.CursoDao cursoDao = new cursos.dao.CursoDao();
+                
                 //CONFIGURAR LA RUTA Y CREAR EL DOCUMENTO PDF
                 String rutaArchivo = "Certificacion_" + noCarnet.trim() + ".pdf";
                 
@@ -337,10 +354,15 @@ public class FrmAsignacion extends javax.swing.JFrame {
 
                 //FUENTES
                 Font fuenteTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Color.BLACK);
+                Font fuenteTitulo2 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK);
                 Font fuenteSub = FontFactory.getFont(FontFactory.HELVETICA, 12, Color.BLACK);
                 Font fuenteNormal = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.BLACK);
                 Font fuenteTabla = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
 
+                //FUENTES PARA TABLA
+                Font fuenteTabla1 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, new Color(90, 90, 90));
+                Font fuenteTabla2 = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.BLACK);
+                
                 //ENCABEZADO SE HACE UNA TABLA PARA SU POSICIÓN
                 PdfPTable encabezado = new PdfPTable(2);
                 encabezado.setWidthPercentage(100);
@@ -350,7 +372,7 @@ public class FrmAsignacion extends javax.swing.JFrame {
                 PdfPCell celdaLogo = new PdfPCell();
                 celdaLogo.setBorder(PdfPCell.NO_BORDER);
                 try {
-                    Image logo = Image.getInstance("logo-upana.png");
+                    Image logo = Image.getInstance("logo.png");
                     logo.scaleToFit(100, 100); //Ancho y alto máximo
                     celdaLogo.addElement(logo);
                 } catch (Exception e){
@@ -365,44 +387,125 @@ public class FrmAsignacion extends javax.swing.JFrame {
                 
                 //ENCABEZADO
                 Paragraph titulo = new Paragraph("CERTIFICACIÓN DE CURSOS", fuenteTitulo);
-                titulo.setAlignment(Element.ALIGN_CENTER);
+                titulo.setAlignment(Element.ALIGN_RIGHT);
                 Paragraph subtitulo = new Paragraph("Sistema Académico Universitario", fuenteSub);
-                subtitulo.setAlignment(Element.ALIGN_CENTER);
+                subtitulo.setAlignment(Element.ALIGN_RIGHT);
+                Paragraph subtitulo2 = new Paragraph("Universidad People Managers", fuenteSub);
+                subtitulo2.setAlignment(Element.ALIGN_RIGHT);
+                Paragraph subtitulo3 = new Paragraph("FACULTAD DE INGENIERÍA", fuenteTitulo2);
+                subtitulo3.setAlignment(Element.ALIGN_RIGHT);
+                Paragraph subtitulo4 = new Paragraph("Carrera De Ingeniería En Sistemas", fuenteSub);
+                subtitulo4.setAlignment(Element.ALIGN_RIGHT);
                 
                 celdaTitulo.addElement(titulo);
                 celdaTitulo.addElement(subtitulo);
+                celdaTitulo.addElement(subtitulo2);
+                celdaTitulo.addElement(subtitulo3);
+                celdaTitulo.addElement(subtitulo4);
                 encabezado.addCell(celdaTitulo);
                 
                 documento.add(encabezado);
                 documento.add(new Paragraph(" "));
-
-                //INFORMACIÓN DEL ESTUDIANTE
-                SimpleDateFormat sdfFormato = new SimpleDateFormat("dd//MM/yyyy");
-                String fechaActual = sdfFormato.format(new Date());
                 
-                documento.add(new Paragraph("No. de Carnet: " + noCarnet.trim(), fuenteNormal));
-                documento.add(new Paragraph("Fecha de Emisión: " + fechaActual, fuenteNormal));
+                //SEPARADOR
+                LineSeparator linea = new LineSeparator();
+                linea.setLineColor(new java.awt.Color(80, 80, 80));
+                linea.setPercentage(100); //OCUPA TODO EL ANCHO
+                documento.add(new Chunk(linea));
                 documento.add(new Paragraph(" "));
 
-                //TABLA DE CURSOS
+                //INFORMACIÓN DEL ESTUDIANTE
+                SimpleDateFormat sdfFormato = new SimpleDateFormat("dd/MM/yyyy");
+                String fechaActual = sdfFormato.format(new Date());
+                
+                PdfPTable tablaInfo = new PdfPTable(2);
+                tablaInfo.setWidthPercentage(100);
+                tablaInfo.setWidths(new float[]{50f, 50f});
+                
+                //COLORES DE FONDO
+                Color fondo = new Color(245, 245, 245);
+                
+                //FILA 1 TÍTULOS
+                PdfPCell c1 = new PdfPCell(new Paragraph("Nombre del Estudiante:", fuenteTabla1));
+                c1.setBackgroundColor(fondo);
+                c1.setPadding(6f);
+                tablaInfo.addCell(c1);
+                
+                PdfPCell c2 = new PdfPCell(new Paragraph("Fecha de Emisión:", fuenteTabla1));
+                c2.setBackgroundColor(fondo);
+                c2.setPadding(6f);
+                tablaInfo.addCell(c2);
+                
+                //FILA 2 VALORES
+                PdfPCell c3 = new PdfPCell(new Paragraph(nombreCompleto, fuenteTabla2));
+                c3.setBackgroundColor(Color.WHITE);
+                c3.setPaddingBottom(8f);
+                c3.setPaddingLeft(6f);
+                tablaInfo.addCell(c3);
+                
+                PdfPCell c4 = new PdfPCell(new Paragraph(fechaActual, fuenteTabla2));
+                c4.setBackgroundColor(Color.white);
+                c4.setPaddingBottom(8f);
+                c4.setPaddingLeft(6f);
+                tablaInfo.addCell(c4);
+                
+                //FILA 3 TÍTULOS
+                PdfPCell c5 = new PdfPCell(new Paragraph("No. De Colaborador", fuenteTabla1));
+                c5.setBackgroundColor(fondo);
+                c5.setPadding(6f);
+                tablaInfo.addCell(c5);
+                
+                PdfPCell c6 = new PdfPCell(new Paragraph("Ciclo", fuenteTabla1));
+                c6.setBackgroundColor(fondo);
+                c6.setPadding(6f);
+                tablaInfo.addCell(c6);
+                
+                //FILA 4 VALORES
+                PdfPCell c7 = new PdfPCell(new Paragraph(carnetMostrado, fuenteTabla2));
+                c7.setBackgroundColor(Color.WHITE);
+                c7.setPaddingBottom(8f);
+                c7.setPaddingLeft(6f);
+                tablaInfo.addCell(c7);
+                
+                PdfPCell c8 = new PdfPCell(new Paragraph("Semestre II", fuenteTabla2));
+                c8.setBackgroundColor(Color.WHITE);
+                c8.setPaddingBottom(8f);
+                c8.setPaddingLeft(6f);
+                tablaInfo.addCell(c8);
+
+                documento.add(tablaInfo);
+                documento.add(new Paragraph(" "));
+                
+                //TABLA DE CURSOS CON CONEXIÓN
                 PdfPTable tabla = new PdfPTable(4);
                 tabla.setWidthPercentage(100);
                 tabla.setWidths(new float[]{2f, 3f, 2f, 3f});
                 
-                String[] cabeceras = {"No. Carnet", "ID Curso", "Califiación", "Fecha Aprobación"};
+                String[] cabeceras = {"ID Curso", "Nombre del Curso", "Calificación", "Fecha Aprobación"};
                 for (String cabecera : cabeceras) {
                     PdfPCell celda = new PdfPCell(new Paragraph(cabecera, fuenteTabla));
-                    celda.setBackgroundColor(new Color(0, 39, 118));
+                    celda.setBackgroundColor(new Color(0, 139, 139));
                     celda.setHorizontalAlignment(Element.ALIGN_CENTER);
                     celda.setPadding(6);
                     tabla.addCell(celda);
                 }
                 
                 SimpleDateFormat sdfAsig = new SimpleDateFormat("dd-MM-yyyy");
-                for (Asignacion asig : listaAsignacions) {
-                    tabla.addCell(new PdfPCell(new Paragraph(asig.getNoCarnet(), fuenteNormal)));
+                for (Asignacion asig : listaAsignaciones) {
+                    String nombreCurso = "Curso Desconocido";
+                    try{
+                        int idCursoInt = Integer.parseInt(asig.getIdCurso());
+                        cursos.model.Curso cursoObj = cursoDao.obtenerId(idCursoInt);
+                        if (cursoObj != null) {
+                            nombreCurso = cursoObj.getNombreCurso();
+                        }
+                    }catch (NumberFormatException e){
+                        nombreCurso = asig.getIdCurso();
+                    }
                     tabla.addCell(new PdfPCell(new Paragraph(asig.getIdCurso(), fuenteNormal)));
+                    tabla.addCell(new PdfPCell(new Paragraph(nombreCurso, fuenteNormal)));
                     tabla.addCell(new PdfPCell(new Paragraph(String.valueOf(asig.getCalificacion()), fuenteNormal)));
+                    
                     String fechaAprob = asig.getFechaAprobacion() != null ? sdfAsig.format(asig.getFechaAprobacion()) : "";
                     tabla.addCell(new PdfPCell(new Paragraph(fechaAprob, fuenteNormal)));
                 }

@@ -22,6 +22,8 @@ public class FrmEstudiante extends javax.swing.JFrame {
     public FrmEstudiante() {
         initComponents();
         jTable1.setModel(modeloTabla);
+        // Configura para que solo se cierre esta ventana y no afecte el menú principal
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
     }
 

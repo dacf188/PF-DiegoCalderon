@@ -30,6 +30,8 @@ public class FrmCurso extends javax.swing.JFrame {
      */
     public FrmCurso() {
         initComponents();
+        // Configura para que solo se cierre esta ventana y no afecte el menú principal
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         jTable1.setModel(modeloTabla);
         setLocationRelativeTo(null);
     }
