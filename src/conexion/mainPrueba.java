@@ -17,8 +17,6 @@ public class mainPrueba {
             } else {
                 System.out.println("FALLÓ LA CONEXIÓN.");
             }
-            // 2. Probar Cursos
-            /*
             System.out.print("Conectando a Cursos... ");
             Connection conCur = CreateConnection.getConnectionCursos();
             if (conCur != null) {
@@ -26,8 +24,6 @@ public class mainPrueba {
             } else {
                 System.out.println("FALLO LA CONEXIÓN.");
             }
-*/
-
             // 3. Probar Asignaciones
             System.out.print("Conectando a Asignaciones... ");
             Connection conAsig = CreateConnection.getConnectionAsignaciones();
@@ -38,9 +34,9 @@ public class mainPrueba {
             }
 
             if (conEst != null) conEst.close();
-            /*if (conCur != null) {
+            if (conCur != null) {
                 conCur.close();
-            }*/
+            }
             if (conAsig != null) {
                 conAsig.close();
             }

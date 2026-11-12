@@ -13,15 +13,14 @@ public class CreateConnection {
     private static Properties config = new Properties();
     
     static{
-        try (InputStream input = CreateConnection.class.getClassLoader().getResourceAsStream("conexion/db_config.properties")){
-            if (input != null) {
-                config.load(input);
-            } else {
-                String path = "C:\\Users\\EstuardoC\\OneDrive\\Documents\\NetBeans Project\\PFDiegoCalderon\\src\\conexion\\db_config.properties";
-                config.load(Files.newInputStream(Paths.get(path)));
-            }
-        } catch (Exception e) {
-            System.out.println("Error al cargar la configuración" + e.getMessage());
+        String recurso = "conexion/db_config.properties";
+        try (InputStream input = CreateConnection.class.getClassLoader().getResourceAsStream(recurso)){
+            if (input == null) {
+                throw  new IllegalStateException("No se encontró" + recurso + " en el classpath");
+            } 
+            config.load(input);
+        } catch (IOException e) {
+            throw new ExceptionInInitializerError("No se pudo cargar la configuración " + e.getMessage());
         }
     }
     public static Connection getConnectionEstudiantes() throws SQLException{
